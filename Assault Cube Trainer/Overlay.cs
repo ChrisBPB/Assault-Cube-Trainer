@@ -142,8 +142,6 @@ namespace Assault_Cube_Trainer
             {
                 //get the game window points
                 GetWindowRect(handle, out gameWindow);
-                //setup = true;
-                //timer1.Enabled = true;
             }
         }
 
