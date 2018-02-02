@@ -34,9 +34,6 @@ namespace Assault_Cube_Trainer
         public PlayerEntity[] players;
         public PlayerEntity localPlayer;
 
-        //to draw
-        //player->multiple enemies
-        //player->multiplie multiple enemies
         public Dictionary<PlayerEntity, PlayerEntity[]> espLineEntities;
 
         public GameManager(int baseAddress, Memory pm)
@@ -47,6 +44,7 @@ namespace Assault_Cube_Trainer
 
         public void startPlayerThread()
         {
+            //need a stop or pause option when I stop being lazy
             Thread thread = new Thread(new ThreadStart(loopPlayerLoad));
             thread.Start();
             thread.IsBackground = true;
@@ -75,8 +73,6 @@ namespace Assault_Cube_Trainer
 
         public void loadNonLocalPlayers()
         {
-            //get how many players are in the game
-            //make this a new thread so it's constantly loading the players?
             int playerArray = pm.ReadInt(this.baseAddress + this.offsets.playerArrayOffset);
             int numberOfPlayers = pm.ReadInt(this.baseAddress + this.offsets.numberOfPlayersOffset);
             
@@ -97,7 +93,7 @@ namespace Assault_Cube_Trainer
                         if (player > 0)
                         {
                             PlayerEntity p = new PlayerEntity(player, pm);
-                            p.loadPlayerData();
+                            p.loadPlayerData(); //this returns true or false, maybe use as validation also
                             players[i] = p;
                         }
                     }
