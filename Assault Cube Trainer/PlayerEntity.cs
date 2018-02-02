@@ -54,6 +54,7 @@ namespace Assault_Cube_Trainer
         public int health, armour, ammoSpare, ammoClip, grenadeAmmo, rapidFire;
         public string name;
 
+
         private Memory pm;
 
         public PlayerEntity(int baseAddress, int[] multiLevel, Memory pm)
@@ -103,6 +104,41 @@ namespace Assault_Cube_Trainer
 
             return false;
         }
+
+        
+        public void LockTarget(PlayerEntity entity)
+        {
+            if (entity == null)
+                return;
+
+            float[] xy = Calculations.EntityAimCoord(entity, this);
+
+
+            pm.WriteFloat(this.baseAddress + this.offsets.yaw, xy[0]);
+            pm.WriteFloat(this.baseAddress + this.offsets.pitch, xy[1]);
+
+        }
+
+        public PlayerEntity GetClosestEntity(PlayerEntity[] entities)
+        {
+            PlayerEntity p = null;
+            float distance = float.MaxValue;
+
+            for (int i = 0; i < entities.Length; i++)
+            {
+                if (entities[i] != null)
+                {
+                    float td = Calculations.Get3dDistance(entities[i], this);
+                    if (td < distance)
+                    {
+                        p = entities[i];
+                        distance = td;
+                    }
+                }
+            }
+            return p;
+        }
+
 
     }
 }

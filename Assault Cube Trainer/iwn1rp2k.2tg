@@ -13,21 +13,13 @@ using System.Runtime.InteropServices;
 namespace Assault_Cube_Trainer
 {
 
-
-    /**
-     * This class is just throwing shit together. It is purely for testing. No judgements thanks (:
-     * */
     public partial class frmMain : Form
     {
 
         #region cpp import
 
         public int VK_MOUSERIGHT = 0x02;
-        GameManager gm;
-        Overlay o;
-        Memory pm;
-        Process ac;
-        int gameBase;
+        
 
         [DllImport("user32.dll")]
         public static extern short GetKeyState(int nVirtKey);
@@ -41,16 +33,16 @@ namespace Assault_Cube_Trainer
         private void frmMain_Load(object sender, EventArgs e)
         {
             
-            ac = Process.GetProcessesByName("ac_client")[0];
-            gameBase = ac.MainModule.BaseAddress.ToInt32();
+            Process ac = Process.GetProcessesByName("ac_client")[0];
+            int gameBase = ac.MainModule.BaseAddress.ToInt32();
 
-            pm = new Memory();
+            Memory pm = new Memory();
             pm.ReadProcess = ac;
             pm.OpenProcess();
 
-            gm = new GameManager(gameBase, pm);
+            GameManager gm = new GameManager(gameBase, pm);
 
-            o = new Overlay(pm, gm, "AssaultCube");
+            Overlay o = new Overlay(pm, gm, "AssaultCube");
             o.Show();
             gm.startPlayerThread();
             o.setStarted(true);
@@ -64,11 +56,9 @@ namespace Assault_Cube_Trainer
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (GetKeyState(VK_MOUSERIGHT) == -128 || GetKeyState(VK_MOUSERIGHT) == -127)
+            if (GetKeyState(0x02) & 8000)
             {
-                //right mouse pressed
-                gm.lockLocalToClosest();
-                
+
             }
         }
     }

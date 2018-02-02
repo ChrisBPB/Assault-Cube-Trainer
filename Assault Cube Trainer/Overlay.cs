@@ -11,6 +11,12 @@ using System.Runtime.InteropServices;
 
 namespace Assault_Cube_Trainer
 {
+    
+    public struct POINTS
+    {
+        public int Left, Top, Right, Bottom;
+    }
+
     public partial class Overlay : Form
     {
 
@@ -39,11 +45,8 @@ namespace Assault_Cube_Trainer
         public static extern bool GetWindowRect(IntPtr hwnd, out POINTS lpPoints);
         #endregion
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct POINTS
-        {
-            public int Left, Top, Right, Bottom;
-        }
+        
+        
 
         public string WindowName;
         POINTS gameWindow;
@@ -81,10 +84,12 @@ namespace Assault_Cube_Trainer
                     {
                         for (int i = 0; i < entity.Value.Length; i++)
                         {
-                            if (entity.Value[i] != null)
+                            byte[] matrix = gm.viewMatrix;
+                            if (matrix!=null && entity.Value[i] != null)
                             {
-                                float[] xyFoot = WorldToScreen(entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, true);
-                                float[] xyHead = WorldToScreen(entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, false);
+                                
+                                float[] xyFoot = Calculations.WorldToScreen(matrix, entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, gameWindow, true);
+                                float[] xyHead = Calculations.WorldToScreen(matrix, entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, gameWindow, false);
                                 if (xyFoot != null && xyHead != null)
                                 {
                                     int health = entity.Value[i].health;
@@ -110,45 +115,7 @@ namespace Assault_Cube_Trainer
             }
         }
 
-        /**
-         * 
-         * World to screen function "borrowed" from 0XDE57
-         * 
-         * */
-        public float[] WorldToScreen(PlayerEntity entity, int width, int height, bool foot = true)
-        {
-            byte[] bfr = pm.ReadMatrix(gm.baseAddress + gm.offsets.viewMatrix);
-            float m11 = BitConverter.ToSingle(bfr, 0), m12 = BitConverter.ToSingle(bfr, 4), m13 = BitConverter.ToSingle(bfr, 8), m14 = BitConverter.ToSingle(bfr, 12); //00, 01, 02, 03
-            float m21 = BitConverter.ToSingle(bfr, 16), m22 = BitConverter.ToSingle(bfr, 20), m23 = BitConverter.ToSingle(bfr, 24), m24 = BitConverter.ToSingle(bfr, 28); //04, 05, 06, 07
-            float m31 = BitConverter.ToSingle(bfr, 32), m32 = BitConverter.ToSingle(bfr, 36), m33 = BitConverter.ToSingle(bfr, 40), m34 = BitConverter.ToSingle(bfr, 44); //08, 09, 10, 11
-            float m41 = BitConverter.ToSingle(bfr, 48), m42 = BitConverter.ToSingle(bfr, 52), m43 = BitConverter.ToSingle(bfr, 56), m44 = BitConverter.ToSingle(bfr, 60); //12, 13, 14, 15
-
-            float zPos = entity.getZPos(foot);
-
-            //multiply vector against matrix
-            float screenX = (m11 * entity.xPos) + (m21 * entity.yPos) + (m31 * zPos) + m41;
-            float screenY = (m12 * entity.xPos) + (m22 * entity.yPos) + (m32 * zPos) + m42;
-            float screenW = (m14 * entity.xPos) + (m24 * entity.yPos) + (m34 * zPos) + m44;
-
-
-            //camera position (eye level/middle of screen)
-            float camX = width / 2f;
-            float camY = height / 2f;
-
-            //convert to homogeneous position
-            float x = camX + (camX * screenX / screenW);
-            float y = camY - (camY * screenY / screenW);
-            float[] screenPos = { x, y };
-            
-            //check it is in the bounds to draw
-            if (screenW > 0.001f  //not behind us
-                && gameWindow.Left + x > gameWindow.Left && gameWindow.Left + x < gameWindow.Right //not off the left or right of the window
-                && gameWindow.Top + y > gameWindow.Top && gameWindow.Top + y < gameWindow.Bottom) //not off the top of bottom of the window
-            {
-                return screenPos;
-            }
-            return null;
-        }
+        
 
 
 

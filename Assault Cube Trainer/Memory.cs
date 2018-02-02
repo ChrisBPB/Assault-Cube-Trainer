@@ -20,6 +20,12 @@ namespace Assault_Cube_Trainer
 
         [DllImport("kernel32.dll")]
         public static extern IntPtr OpenProcess(UInt32 dwDesiredAccess, Int32 bInheritHandle, UInt32 dwProcessId);
+
+        [DllImport("kernel32.dll")]
+        public static extern Int32 WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [In, Out] byte[] buffer, UInt32 size, out IntPtr lpNumberOfBytesWritten);
+        
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, UInt32 dwSize, uint flNewProtect, out uint lpflOldProtect);
         #endregion
 
         #region constants
@@ -145,6 +151,29 @@ namespace Assault_Cube_Trainer
             ReadProcessMemory(procHandle, (IntPtr)MemoryAddress, buffer, bytesToRead, out ptrBytesReaded);
             CloseHandle(procHandle);
             return ptrBytesReaded.ToInt32();
+        }
+
+
+        /****/
+
+        public int WriteMem(int MemoryAddress, byte[] buf)
+        {
+            IntPtr procHandle = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, 1, (uint)m_ReadProcess.Id);
+            if (procHandle == IntPtr.Zero)
+                return 0;
+
+            uint oldProtect;
+            VirtualProtectEx(procHandle, (IntPtr)MemoryAddress, (uint)buf.Length, PAGE_READWRITE, out oldProtect);
+            IntPtr ptrBytesWritten;
+            WriteProcessMemory(procHandle, (IntPtr)MemoryAddress, buf, (uint)buf.Length, out ptrBytesWritten);
+            CloseHandle(procHandle);
+            return ptrBytesWritten.ToInt32();
+        }
+
+        public void WriteFloat(int MemoryAddress, float f)
+        {
+            byte[] buf = BitConverter.GetBytes(f);
+            WriteMem(MemoryAddress, buf);
         }
 
     }

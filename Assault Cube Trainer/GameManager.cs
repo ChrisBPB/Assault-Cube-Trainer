@@ -33,6 +33,7 @@ namespace Assault_Cube_Trainer
 
         public PlayerEntity[] players;
         public PlayerEntity localPlayer;
+        public byte[] viewMatrix;
 
         public Dictionary<PlayerEntity, PlayerEntity[]> espEntities;
 
@@ -54,16 +55,21 @@ namespace Assault_Cube_Trainer
         {
             while (true)
             {
+                loadViewMatrix();
                 loadNonLocalPlayers();
                 loadLocalPlayer();
             }
+        }
+
+        public void loadViewMatrix(){
+            this.viewMatrix = pm.ReadMatrix(this.baseAddress + this.offsets.viewMatrix);
         }
 
         public void loadLocalPlayer()
         {
             if (localPlayer == null)
             {
-                localPlayer = new PlayerEntity(this.baseAddress + this.offsets.localPlayer, pm);
+                localPlayer = new PlayerEntity(this.baseAddress + this.offsets.localPlayer, new int[] { 0x0 }, pm);
                 espEntities = new Dictionary<PlayerEntity, PlayerEntity[]>();
                 espEntities.Add(localPlayer, players);
             }
@@ -95,6 +101,7 @@ namespace Assault_Cube_Trainer
                             PlayerEntity p = new PlayerEntity(player, pm);
                             p.loadPlayerData(); //this returns true or false, maybe use as validation also
                             players[i] = p;
+
                         }
                     }
                 }
@@ -103,13 +110,24 @@ namespace Assault_Cube_Trainer
                     for (int i = 0; i < numberOfPlayers; i++)
                     {
                         if (players[i] != null) {
-                        players[i].loadPlayerData();
-                            }
+                            players[i].loadPlayerData();
+                        }
                     }
                 }
             }
 
         }
+
+        public void lockLocalToClosest()
+        {
+            if (localPlayer != null && players != null && players.Count() > 0)
+            {
+                PlayerEntity p = localPlayer.GetClosestEntity(players);
+                localPlayer.LockTarget(p);
+            }
+        }
+
+        
 
     }
 }
