@@ -34,7 +34,7 @@ namespace Assault_Cube_Trainer
         public PlayerEntity[] players;
         public PlayerEntity localPlayer;
 
-        public Dictionary<PlayerEntity, PlayerEntity[]> espLineEntities;
+        public Dictionary<PlayerEntity, PlayerEntity[]> espEntities;
 
         public GameManager(int baseAddress, Memory pm)
         {
@@ -64,8 +64,8 @@ namespace Assault_Cube_Trainer
             if (localPlayer == null)
             {
                 localPlayer = new PlayerEntity(this.baseAddress + this.offsets.localPlayer, pm);
-                espLineEntities = new Dictionary<PlayerEntity, PlayerEntity[]>();
-                espLineEntities.Add(localPlayer, players);
+                espEntities = new Dictionary<PlayerEntity, PlayerEntity[]>();
+                espEntities.Add(localPlayer, players);
             }
             
             localPlayer.loadPlayerData();

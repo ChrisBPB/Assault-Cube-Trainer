@@ -74,20 +74,27 @@ namespace Assault_Cube_Trainer
             if (started)
             {
                 Graphics g = e.Graphics;
-                if (gm.espLineEntities != null)
+                if (gm.espEntities != null)
                 {
                     Point from = new Point((gameWindow.Right - (gameWindow.Left / 2)), gameWindow.Bottom);
-                    foreach (KeyValuePair<PlayerEntity, PlayerEntity[]> entity in gm.espLineEntities)
+                    foreach (KeyValuePair<PlayerEntity, PlayerEntity[]> entity in gm.espEntities)
                     {
                         for (int i = 0; i < entity.Value.Length; i++)
                         {
                             if (entity.Value[i] != null)
                             {
-                                float[] xy = WorldToScreen(entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top);
-                                if (xy != null)
+                                float[] xyFoot = WorldToScreen(entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, true);
+                                float[] xyHead = WorldToScreen(entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, false);
+                                if (xyFoot != null && xyHead != null)
                                 {
-                                    Point to = new Point(((int)(gameWindow.Left + xy[0])), (int)(gameWindow.Top + xy[1]));
+                                    //ESP line
+                                    Point to = new Point(((int)(gameWindow.Left + xyFoot[0])), (int)(gameWindow.Top + xyFoot[1]));
                                     g.DrawLine(pen, from, to);
+
+                                    //ESP Box
+                                    float height = Math.Abs(xyHead[1] - xyFoot[1]); //get the height of our Entity
+                                    float width = (float)(height / 2.5);            //players don't expand so we can just trial and error the width based on height
+                                    g.DrawRectangle(pen, (gameWindow.Left + (xyHead[0] - width / 2)), (gameWindow.Top + (xyHead[1])), width, height);
                                 }
                             }
                            
@@ -102,7 +109,7 @@ namespace Assault_Cube_Trainer
          * World to screen function "borrowed" from 0XDE57
          * 
          * */
-        public float[] WorldToScreen(PlayerEntity entity, int width, int height)
+        public float[] WorldToScreen(PlayerEntity entity, int width, int height, bool foot = true)
         {
             byte[] bfr = pm.ReadMatrix(gm.baseAddress + gm.offsets.viewMatrix);
             float m11 = BitConverter.ToSingle(bfr, 0), m12 = BitConverter.ToSingle(bfr, 4), m13 = BitConverter.ToSingle(bfr, 8), m14 = BitConverter.ToSingle(bfr, 12); //00, 01, 02, 03
@@ -110,11 +117,12 @@ namespace Assault_Cube_Trainer
             float m31 = BitConverter.ToSingle(bfr, 32), m32 = BitConverter.ToSingle(bfr, 36), m33 = BitConverter.ToSingle(bfr, 40), m34 = BitConverter.ToSingle(bfr, 44); //08, 09, 10, 11
             float m41 = BitConverter.ToSingle(bfr, 48), m42 = BitConverter.ToSingle(bfr, 52), m43 = BitConverter.ToSingle(bfr, 56), m44 = BitConverter.ToSingle(bfr, 60); //12, 13, 14, 15
 
+            float zPos = entity.getZPos(foot);
 
             //multiply vector against matrix
-            float screenX = (m11 * entity.xPos) + (m21 * entity.yPos) + (m31 * entity.zPosFoot) + m41;
-            float screenY = (m12 * entity.xPos) + (m22 * entity.yPos) + (m32 * entity.zPosFoot) + m42;
-            float screenW = (m14 * entity.xPos) + (m24 * entity.yPos) + (m34 * entity.zPosFoot) + m44;
+            float screenX = (m11 * entity.xPos) + (m21 * entity.yPos) + (m31 * zPos) + m41;
+            float screenY = (m12 * entity.xPos) + (m22 * entity.yPos) + (m32 * zPos) + m42;
+            float screenW = (m14 * entity.xPos) + (m24 * entity.yPos) + (m34 * zPos) + m44;
 
 
             //camera position (eye level/middle of screen)

@@ -67,6 +67,13 @@ namespace Assault_Cube_Trainer
             this.pm = pm;
         }
 
+        public float getZPos(bool foot){
+            if(foot)
+                return this.zPosFoot;
+            else
+                return this.zPosHead;
+        }
+
         public bool loadPlayerData()
         {
             //player data is 0x260 bytes long'ish
