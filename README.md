@@ -2,7 +2,7 @@
 
 Just some playing around with Assault Cube as I learn some memory read/write basics in my free time, and a bit of C#. The solution is a completely external and uses GDI to draw onto an overlay.
 
-## Built With
+## Features
 
 * C# (though some cpp methods imported for memory reading ease)
 * GDI for drawing graphics
