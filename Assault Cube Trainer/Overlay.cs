@@ -133,8 +133,11 @@ namespace Assault_Cube_Trainer
             float x = camX + (camX * screenX / screenW);
             float y = camY - (camY * screenY / screenW);
             float[] screenPos = { x, y };
-
-            if (screenW > 0.001f)
+            
+            //check it is in the bounds to draw
+            if (screenW > 0.001f  //not behind us
+                && gameWindow.Left + x > gameWindow.Left && gameWindow.Left + x < gameWindow.Right //not off the left or right of the window
+                && gameWindow.Top + y > gameWindow.Top && gameWindow.Top + y < gameWindow.Bottom) //not off the top of bottom of the window
             {
                 return screenPos;
             }
