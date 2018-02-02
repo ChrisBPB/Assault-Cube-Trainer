@@ -6,9 +6,11 @@ Just some playing around with Assault Cube as I learn some memory read/write bas
 
 * C# (though some cpp methods imported for memory reading ease)
 * GDI for drawing graphics
-* ESP Line only at this time, looking to add aimbot and more in my free time.
+* ESP Line, Box, and Aimbot (right mouse).
 
+![Another Image](https://i.imgur.com/HQOHw5v.gif)
 ![Image of Hack](https://i.imgur.com/1eY42LN.png)
+
 
 
 ## Acknowledgments
