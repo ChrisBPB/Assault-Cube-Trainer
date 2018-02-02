@@ -87,14 +87,20 @@ namespace Assault_Cube_Trainer
                                 float[] xyHead = WorldToScreen(entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, false);
                                 if (xyFoot != null && xyHead != null)
                                 {
-                                    //ESP line
-                                    Point to = new Point(((int)(gameWindow.Left + xyFoot[0])), (int)(gameWindow.Top + xyFoot[1]));
-                                    g.DrawLine(pen, from, to);
+                                    int health = entity.Value[i].health;
+                                    if (health > 0)
+                                    {
+                                        pen.Color = Color.FromArgb(255, 255 - health, health, 0); //redder depending on health
 
-                                    //ESP Box
-                                    float height = Math.Abs(xyHead[1] - xyFoot[1]); //get the height of our Entity
-                                    float width = height / 2;            //players don't expand so we can just trial and error the width based on height
-                                    g.DrawRectangle(pen, (gameWindow.Left + (xyHead[0] - width / 2)), (gameWindow.Top + (xyHead[1])), width, height);
+                                        //ESP line
+                                        Point to = new Point(((int)(gameWindow.Left + xyFoot[0])), (int)(gameWindow.Top + xyFoot[1]));
+                                        g.DrawLine(pen, from, to);
+
+                                        //ESP Box
+                                        float height = Math.Abs(xyHead[1] - xyFoot[1]); //get the height of our Entity
+                                        float width = height / 2;            //players don't expand so we can just trial and error the width based on height
+                                        g.DrawRectangle(pen, (gameWindow.Left + (xyHead[0] - width / 2)), (gameWindow.Top + (xyHead[1])), width, height);
+                                    }
                                 }
                             }
                            
