@@ -31,11 +31,11 @@ namespace Assault_Cube_Trainer
         public int baseAddress;
         public Memory pm;
 
-        public PlayerEntity[] players;
-        public PlayerEntity localPlayer;
+        public Player[] players;
+        public Player localPlayer;
         public byte[] viewMatrix;
 
-        public Dictionary<PlayerEntity, PlayerEntity[]> espEntities;
+        public Dictionary<LocatableEntity, LocatableEntity[]> espEntities;
 
         public GameManager(int baseAddress, Memory pm)
         {
@@ -69,8 +69,8 @@ namespace Assault_Cube_Trainer
         {
             if (localPlayer == null)
             {
-                localPlayer = new PlayerEntity(this.baseAddress + this.offsets.localPlayer, new int[] { 0x0 }, pm);
-                espEntities = new Dictionary<PlayerEntity, PlayerEntity[]>();
+                localPlayer = new Player(this.baseAddress + this.offsets.localPlayer, new int[] { 0x0 }, pm);
+                espEntities = new Dictionary<LocatableEntity, LocatableEntity[]>();
                 espEntities.Add(localPlayer, players);
             }
             
@@ -88,7 +88,7 @@ namespace Assault_Cube_Trainer
                 if ( players == null || numberOfPlayers!=players.Count() || (players.Count()>0 && players[0] != null && players[0].xPos<0)) //check if object is invalid, if it is then we need to fetch new data
                 {
                     localPlayer = null;
-                    players = new PlayerEntity[numberOfPlayers];
+                    players = new Player[numberOfPlayers];
                     uint size = (uint)(numberOfPlayers * 0x04);
                     byte[] buffer = new byte[size];
                     pm.ReadMem(playerArray, size, out buffer);
@@ -98,7 +98,7 @@ namespace Assault_Cube_Trainer
                         int player = BitConverter.ToInt32(buffer, i * 0x04);
                         if (player > 0)
                         {
-                            PlayerEntity p = new PlayerEntity(player, pm);
+                            Player p = new Player(player, pm);
                             p.loadPlayerData(); //this returns true or false, maybe use as validation also
                             players[i] = p;
 
@@ -122,7 +122,7 @@ namespace Assault_Cube_Trainer
         {
             if (localPlayer != null && players != null && players.Count() > 0)
             {
-                PlayerEntity p = localPlayer.GetClosestEntity(players);
+                LocatableEntity p = localPlayer.GetClosestEntity(players);
                 localPlayer.LockTarget(p);
             }
         }

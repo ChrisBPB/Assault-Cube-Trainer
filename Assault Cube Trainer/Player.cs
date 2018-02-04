@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace Assault_Cube_Trainer
 {
-    public class PlayerEntity
+
+    /*
+     * Represents a Player in the game. Inherits Locatable.
+     */ 
+    public class Player : LocatableEntity
     {
 
-        public struct Offsets
+        /**
+         * Offsets for our player.
+         */ 
+        public new struct Offsets
         {
             public int health, xPos, yPos, zPosHead, zPosFoot, yaw, pitch, armour, ammoSpare, ammoClip, grenadeAmmo, fireRate, name;
 
@@ -32,7 +39,7 @@ namespace Assault_Cube_Trainer
             }
         }
 
-        public Offsets offsets = new Offsets(
+        public new Offsets offsets = new Offsets(
                 0xF8,
                 0x04,
                 0x08,
@@ -48,33 +55,35 @@ namespace Assault_Cube_Trainer
                 0x225
             );
 
-        public int baseAddress;
-
-        public float xPos, yPos, zPosHead, zPosFoot, yaw, pitch;
+        public float zPosHead, zPosFoot, yaw, pitch; //notice we don't need xPos yPos zPos because they are inherited..
         public int health, armour, ammoSpare, ammoClip, grenadeAmmo, rapidFire;
         public string name;
 
 
-        private Memory pm;
-
-        public PlayerEntity(int baseAddress, int[] multiLevel, Memory pm)
+       
+        public Player(int baseAddress, int[] multiLevel, Memory pm) : base(baseAddress, multiLevel, pm)
         {
-            this.baseAddress = pm.ReadMultiLevelPointer(baseAddress, 4, multiLevel);
-            this.pm = pm;
+            //don't need anything here, we just call the super classes constructor
         }
 
-        public PlayerEntity(int baseAddress, Memory pm){
-            this.baseAddress = baseAddress;
-            this.pm = pm;
+        public Player(int baseAddress, Memory pm): base(baseAddress, pm)
+        {
+            //don't need anything here, we just call the super classes constructor   
         }
 
-        public float getZPos(bool foot){
+        /*
+         * Returns the correct zPos for users needs
+         */ 
+        public new float getZPos(bool foot){
             if(foot)
                 return this.zPosFoot;
             else
                 return this.zPosHead;
         }
 
+        /*
+         * Loads the players data. Sets zPos to the Players foot.
+         */ 
         public bool loadPlayerData()
         {
             //player data is 0x260 bytes long'ish
@@ -97,6 +106,9 @@ namespace Assault_Cube_Trainer
 
             this.name = BitConverter.ToString(buffer, this.offsets.name); //our offset for this is not correct
 
+            base.zPos = this.zPosFoot;
+          
+
             if (this.xPos > 0)
             {
                 return true;
@@ -105,8 +117,10 @@ namespace Assault_Cube_Trainer
             return false;
         }
 
-        
-        public void LockTarget(PlayerEntity entity)
+        /*
+         * Locals the Player to an entity
+         */ 
+        public void LockTarget(LocatableEntity entity)
         {
             if (entity == null)
                 return;
@@ -119,26 +133,16 @@ namespace Assault_Cube_Trainer
 
         }
 
-        public PlayerEntity GetClosestEntity(PlayerEntity[] entities)
+        /*
+         * Returns true if Player is alive and Valid
+         */ 
+        public new bool valid()
         {
-            PlayerEntity p = null;
-            float distance = float.MaxValue;
-
-            for (int i = 0; i < entities.Length; i++)
-            {
-                if (entities[i] != null)
-                {
-                    float td = Calculations.Get3dDistance(entities[i], this);
-                    if (td < distance)
-                    {
-                        p = entities[i];
-                        distance = td;
-                    }
-                }
-            }
-            return p;
+            return base.valid() && this.health > 0;
         }
 
 
     }
-}
+
+    }
+

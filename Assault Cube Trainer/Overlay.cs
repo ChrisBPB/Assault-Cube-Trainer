@@ -11,7 +11,10 @@ using System.Runtime.InteropServices;
 
 namespace Assault_Cube_Trainer
 {
-    
+ 
+    /**
+     * POINTS of our rect x,y x,y
+     */ 
     public struct POINTS
     {
         public int Left, Top, Right, Bottom;
@@ -48,13 +51,13 @@ namespace Assault_Cube_Trainer
         
         
 
-        public string WindowName;
-        POINTS gameWindow;
+        public string WindowName; //name of window to get the handle to
+        POINTS gameWindow;        //x,y x,y of our Game Window
 
-        bool started = false;
+        bool started = false;     //has drawing started?
 
-        public Memory pm;
-        public GameManager gm;
+        public Memory pm;         //our memory object
+        public GameManager gm;    //the game manager object
 
         public Overlay(Memory pm, GameManager gm, string windowName)
         {
@@ -62,7 +65,7 @@ namespace Assault_Cube_Trainer
             this.gm = gm;
             this.WindowName = windowName;
             InitializeComponent();
-            this.TransparencyKey = this.BackColor = Color.Chocolate;
+            this.TransparencyKey = this.BackColor = Color.Chocolate; //makes it transparent
             WindowSetup();
         }
 
@@ -77,10 +80,10 @@ namespace Assault_Cube_Trainer
             if (started)
             {
                 Graphics g = e.Graphics;
-                if (gm.espEntities != null)
+                if (gm.espEntities != null) //if we have stuff to draw
                 {
-                    Point from = new Point((gameWindow.Right - (gameWindow.Left / 2)), gameWindow.Bottom);
-                    foreach (KeyValuePair<PlayerEntity, PlayerEntity[]> entity in gm.espEntities)
+                    Point from = new Point((gameWindow.Right - (gameWindow.Left / 2)), gameWindow.Bottom); //bottom center of screen
+                    foreach (KeyValuePair<LocatableEntity, LocatableEntity[]> entity in gm.espEntities)
                     {
                         for (int i = 0; i < entity.Value.Length; i++)
                         {
@@ -88,24 +91,24 @@ namespace Assault_Cube_Trainer
                             if (matrix!=null && entity.Value[i] != null)
                             {
                                 
-                                float[] xyFoot = Calculations.WorldToScreen(matrix, entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, gameWindow, true);
-                                float[] xyHead = Calculations.WorldToScreen(matrix, entity.Value[i], gameWindow.Right - gameWindow.Left, gameWindow.Bottom - gameWindow.Top, gameWindow, false);
-                                if (xyFoot != null && xyHead != null)
-                                {
-                                    int health = entity.Value[i].health;
-                                    if (health > 0)
-                                    {
-                                        pen.Color = Color.FromArgb(255, 255 - health, health, 0); //redder depending on health
+                                float[] xyFoot = Calculations.WorldToScreen(matrix, entity.Value[i], gameWindow, true); //we get the head and foot because
+                                float[] xyHead = Calculations.WorldToScreen(matrix, entity.Value[i], gameWindow, false);//we use it to calc height of player for esp box
+                                if (xyFoot != null && xyHead != null && entity.Value[i].valid())
+                                {                                      
+                                        int colorWash = entity.Value[i] is Player ? ((Player)entity.Value[i]).health : 1; //we use this to change the red intensity depending on health if it's a player
+                                        if (colorWash > 0)
+                                        {
+                                            pen.Color = Color.FromArgb(255, 255 - colorWash, colorWash, 0);
 
-                                        //ESP line
-                                        Point to = new Point(((int)(gameWindow.Left + xyFoot[0])), (int)(gameWindow.Top + xyFoot[1]));
-                                        g.DrawLine(pen, from, to);
+                                            //ESP line
+                                            Point to = new Point(((int)(gameWindow.Left + xyFoot[0])), (int)(gameWindow.Top + xyFoot[1]));
+                                            g.DrawLine(pen, from, to);
 
-                                        //ESP Box
-                                        float height = Math.Abs(xyHead[1] - xyFoot[1]); //get the height of our Entity
-                                        float width = height / 2;            //players don't expand so we can just trial and error the width based on height
-                                        g.DrawRectangle(pen, (gameWindow.Left + (xyHead[0] - width / 2)), (gameWindow.Top + (xyHead[1])), width, height);
-                                    }
+                                            //ESP Box
+                                            float height = Math.Abs(xyHead[1] - xyFoot[1]); //get the height of our Entity
+                                            float width = height / 2;            //players don't expand so we can just trial and error the width based on height
+                                            g.DrawRectangle(pen, (gameWindow.Left + (xyHead[0] - width / 2)), (gameWindow.Top + (xyHead[1])), width, height);
+                                        }
                                 }
                             }
                            
